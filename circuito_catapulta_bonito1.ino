@@ -24,7 +24,7 @@
 #define db7 27
 */
 
-LiquidCrystal_I2C lcd(0x20, 16, 2);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo servoPuxador;
 Servo servoGirador;
 Servo travaCatapulta;
