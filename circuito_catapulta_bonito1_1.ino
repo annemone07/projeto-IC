@@ -12,7 +12,7 @@
 #define motorAlvoLigar 13
 #define motorAlvoPos 6
 #define motorAlvoNeg 9
-#define botao 7
+#define botao 9
 #define botaoAlvo 10
 #define switchLancamento 8
 #define buzzer 2
@@ -36,13 +36,13 @@ bool botaoLancamentoApertado=false;
 
 int pontos=0;
 String dificuldade = "nao";
-void setup()
+void setup() 
 {
   Serial.begin(9600);
   //lcd_1.begin(16, 2);
   pinMode(botao, INPUT_PULLUP);
   pinMode(botaoAlvo, INPUT_PULLUP);
-  pinMode(switchLancamento,INPUT);
+  pinMode(switchLancamento,INPUT_PULLUP);
   pinMode(servoPuxarLancador,OUTPUT);
   pinMode(servoTrava,OUTPUT);
   pinMode(servoGiro,OUTPUT);
@@ -59,9 +59,12 @@ void setup()
   digitalWrite(motorAlvoLigar, HIGH);
   lcd.init();
   lcd.backlight();
+  servoPuxador.attach(servoPuxarLancador);
+  servoGirador.attach(servoGiro);
+  travaCatapulta.attach(servoTrava);
 }
 
-int tempoLancamento = millis();
+unsigned long tempoLancamento = millis();
 bool updateTempoLancamento = true;
 String dif[3] = {"Facil", "Medio", "Dificil"};
 int i = 0;
@@ -71,14 +74,21 @@ bool valorBotao = 0;
 int velocidade=0;
 void loop()
 {
+  Serial.print("botao ");
+  Serial.println(valorBotao);
   unsigned long tempoInicialDificuldade=millis();
+  Serial.println("selecione");
   lcd.print("Selecione: ");
   lcd.setCursor(0, 1);
   lcd.print("Facil");
   while(dificuldade == "nao"){
     lcd.setCursor(0, 0);
     valorBotao = !digitalRead(botao);
+    Serial.print("botao ");
+    Serial.println(valorBotao);
     while(valorBotao){
+      Serial.print("botao ");
+      Serial.println(valorBotao);
       tempoBotao+=1;
       delay(1);
       apertou=true;
@@ -131,9 +141,10 @@ void loop()
       }
     }
   }
-  Serial.println("saiu");
+  //Serial.println("saiu");
   lcd.clear();
   lcd.home();
+  Serial.print("dificuldade");
   lcd.print("Dificuldade: ");
   lcd.setCursor(0, 1);
   lcd.print(dificuldade);
@@ -146,6 +157,8 @@ void loop()
   lcd.print(dificuldade[0]);
   
   while(dificuldade != "nao"){ 
+    Serial.print("botao2");
+    Serial.println(valorBotao);
     if(dificuldade==dif[0]){
       velocidade=128;
     }
@@ -156,16 +169,17 @@ void loop()
       velocidade=255;
     }
     //Serial.print("loop");
-    servoPuxador.attach(servoPuxarLancador);
-    servoGirador.attach(servoGiro);
-    travaCatapulta.attach(servoTrava);
     //valorBotao = 0;
     bool travaSwitch = 0, valorBotaoAlvo = 0;
     valorBotao = !digitalRead(botao);
 	valorBotaoAlvo = !digitalRead(botaoAlvo);
-    travaSwitch = digitalRead(switchLancamento);
+    travaSwitch = !digitalRead(switchLancamento);
     //Serial.println(valorBotao);
-    Serial.println(valorBotao);
+    //Serial.print("botao");
+    //Serial.println(valorBotao);
+    //Serial.print("trava");
+    //Serial.println(travaSwitch);
+
     
     if (valorBotaoAlvo){
       tone(buzzer, 800, 300);
@@ -185,36 +199,49 @@ void loop()
       }
       if(botaoLancamentoApertado){
         if(updateTempoLancamento){
+          //Serial.println("aaaaaaaaaaaaaaaaaaaaaaa");
           updateTempoLancamento=false;
           tempoLancamento=millis();
         }
-        Serial.print("pontos ");
-        Serial.println(pontos);
+        //Serial.print("pontos ");
+        //Serial.println(pontos);
         valorBotaoAlvo=!digitalRead(botaoAlvo);
+        //Serial.println(tempoLancamento);
+        //Serial.println(millis()-tempoLancamento);
         if(millis()-tempoLancamento<2000){
-          contadorPosServo = constrain(contadorPosServo,0,180);
-          servoGirador.write(contadorPosServo);
+          Serial.print("a ");
+          Serial.println(tempoLancamento);
           analogWrite(motorAlvoPos, 0);
+          lancando=true;
           lancar();
-          travaCatapulta.write(180);
+          travaCatapulta.write(90);
         }
         else if (millis()-tempoLancamento<4000){
+          Serial.print("b ");
+          Serial.println(tempoLancamento);
           lancando=false;
         }
         else if (millis()-tempoLancamento<6000){
-          servoPuxador.write(0);
+          Serial.print("c");
+          Serial.println(tempoLancamento);
+          servoPuxador.write(90);
         }
         else if (millis()-tempoLancamento<8000){
+          Serial.print("d");
+          Serial.println(tempoLancamento);
           travaCatapulta.write(0);
         }
         else{
+          Serial.print("e");
+          Serial.println(tempoLancamento);
+          updateTempoLancamento=true;
           botaoLancamentoApertado=false;
           analogWrite(motorAlvoPos, 255);
-          delay(20);
+          //delay(20);
         }
       }
       else if (!lancando){
-        Serial.print("a");
+        //Serial.print("a");
         moverAlvo(velocidade);
         arrumar();
         girar();
@@ -222,15 +249,16 @@ void loop()
 
     }
     else{
-      Serial.print("noy");
+      //Serial.print("noy");
       moverAlvo(velocidade);
       arrumar();
       girar();
       if (valorBotao){
         lcd.clear();
         lcd.home();
+        Serial.print("trava");
         lcd.print("Trava acionada");
-        delay(250);
+        //delay(250);
         lcd.clear();
       	lcd.home();
       	lcd.print("Pontuacao: ");
@@ -259,7 +287,7 @@ void girar()
   //Serial.println(contadorPosServo);
   if(t0<1500){
     contadorPosServo+=1;
-    contadorPosServo = constrain(contadorPosServo,0,180);
+    contadorPosServo = constrain(contadorPosServo,0,90);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==180){
     //  ladoGiro=false;    
@@ -267,7 +295,7 @@ void girar()
   }
   else{
     contadorPosServo-=1;
-    contadorPosServo = constrain(contadorPosServo,0,180);
+    contadorPosServo = constrain(contadorPosServo,0,90);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==0){
     //  ladoGiro=true;    
@@ -277,15 +305,14 @@ void girar()
 
 void lancar()
 {
-  lancando=true;
   analogWrite(motorAlvoPos, 0); // deixar parando o movimento do alvo durante o lançamento?
   analogWrite(motorAlvoNeg, 0);
-  servoPuxador.write(180);
+  //servoPuxador.write();
 }
 
 void arrumar()
 {
-  updateTempoLancamento=true;
+  //updateTempoLancamento=true;
   travaCatapulta.write(0);
-  servoPuxador.write(180);
+  servoPuxador.write(60);
 }
