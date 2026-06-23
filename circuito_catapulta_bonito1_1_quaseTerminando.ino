@@ -12,7 +12,7 @@
 #define motorAlvoLigar 13
 #define motorAlvoPos 6
 #define motorAlvoNeg 9
-#define botao 9
+#define botao 7
 #define botaoAlvo 10
 #define switchLancamento 8
 #define buzzer 2
@@ -24,11 +24,14 @@
 #define db7 27
 */
 
+int valorTensionado = 130;
+int valorDestensionado = 160;
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo servoPuxador;
 Servo servoGirador;
 Servo travaCatapulta;
-int contadorPosServo=0;
+int contadorPosServo=45;
 bool ladoGiro=true;
 bool ladoAlvo=true;
 bool lancando=false;
@@ -36,6 +39,7 @@ bool botaoLancamentoApertado=false;
 
 int pontos=0;
 String dificuldade = "nao";
+
 void setup() 
 {
   Serial.begin(9600);
@@ -59,8 +63,11 @@ void setup()
   digitalWrite(motorAlvoLigar, HIGH);
   lcd.init();
   lcd.backlight();
+  servoPuxador.write(valorTensionado);
   servoPuxador.attach(servoPuxarLancador);
+  servoGirador.write(45);
   servoGirador.attach(servoGiro);
+  travaCatapulta.write(180);
   travaCatapulta.attach(servoTrava);
 }
 
@@ -84,11 +91,8 @@ void loop()
   while(dificuldade == "nao"){
     lcd.setCursor(0, 0);
     valorBotao = !digitalRead(botao);
-    Serial.print("botao ");
-    Serial.println(valorBotao);
     while(valorBotao){
-      Serial.print("botao ");
-      Serial.println(valorBotao);
+      Serial.println(tempoBotao);
       tempoBotao+=1;
       delay(1);
       apertou=true;
@@ -125,7 +129,7 @@ void loop()
     */
     if(apertou){
       apertou=false;
-      if(tempoBotao <= 1000){
+      if(tempoBotao <= 500){
         tempoBotao = 0;
         i = i + 1;
         if(i==3){
@@ -157,8 +161,8 @@ void loop()
   lcd.print(dificuldade[0]);
   
   while(dificuldade != "nao"){ 
-    Serial.print("botao2");
-    Serial.println(valorBotao);
+    //Serial.print("botao2");
+    //Serial.println(valorBotao);
     if(dificuldade==dif[0]){
       velocidade=128;
     }
@@ -172,7 +176,7 @@ void loop()
     //valorBotao = 0;
     bool travaSwitch = 0, valorBotaoAlvo = 0;
     valorBotao = !digitalRead(botao);
-	valorBotaoAlvo = !digitalRead(botaoAlvo);
+	  valorBotaoAlvo = !digitalRead(botaoAlvo);
     travaSwitch = !digitalRead(switchLancamento);
     //Serial.println(valorBotao);
     //Serial.print("botao");
@@ -224,12 +228,12 @@ void loop()
         else if (millis()-tempoLancamento<6000){
           Serial.print("c");
           Serial.println(tempoLancamento);
-          servoPuxador.write(90);
+          servoPuxador.write(valorDestensionado);
         }
         else if (millis()-tempoLancamento<8000){
           Serial.print("d");
           Serial.println(tempoLancamento);
-          travaCatapulta.write(0);
+          travaCatapulta.write(180);
         }
         else{
           Serial.print("e");
@@ -284,10 +288,12 @@ void girar()
   //ativa motorGiro
   //digitalWrite(motorAlvoLigar, HIGH);
   int t0 = millis()%3000;
+  Serial.println(t0);
   //Serial.println(contadorPosServo);
   if(t0<1500){
     contadorPosServo+=1;
     contadorPosServo = constrain(contadorPosServo,0,90);
+    //Serial.print(contadorPosServo);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==180){
     //  ladoGiro=false;    
@@ -296,6 +302,7 @@ void girar()
   else{
     contadorPosServo-=1;
     contadorPosServo = constrain(contadorPosServo,0,90);
+    //Serial.println(contadorPosServo);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==0){
     //  ladoGiro=true;    
@@ -313,6 +320,6 @@ void lancar()
 void arrumar()
 {
   //updateTempoLancamento=true;
-  travaCatapulta.write(0);
-  servoPuxador.write(60);
+  travaCatapulta.write(180);
+  servoPuxador.write(valorTensionado);
 }
