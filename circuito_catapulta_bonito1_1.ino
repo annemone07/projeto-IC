@@ -24,11 +24,14 @@
 #define db7 27
 */
 
+int valorTensionado = 130;
+int valorDestensionado = 160;
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo servoPuxador;
 Servo servoGirador;
 Servo travaCatapulta;
-int contadorPosServo=0;
+int contadorPosServo=45;
 bool ladoGiro=true;
 bool ladoAlvo=true;
 bool lancando=false;
@@ -60,7 +63,7 @@ void setup()
   digitalWrite(motorAlvoLigar, HIGH);
   lcd.init();
   lcd.backlight();
-  servoPuxador.write(30);
+  servoPuxador.write(valorTensionado);
   servoPuxador.attach(servoPuxarLancador);
   servoGirador.write(45);
   servoGirador.attach(servoGiro);
@@ -126,7 +129,7 @@ void loop()
     */
     if(apertou){
       apertou=false;
-      if(tempoBotao <= 1000){
+      if(tempoBotao <= 500){
         tempoBotao = 0;
         i = i + 1;
         if(i==3){
@@ -158,8 +161,8 @@ void loop()
   lcd.print(dificuldade[0]);
   
   while(dificuldade != "nao"){ 
-    Serial.print("botao2");
-    Serial.println(valorBotao);
+    //Serial.print("botao2");
+    //Serial.println(valorBotao);
     if(dificuldade==dif[0]){
       velocidade=128;
     }
@@ -225,7 +228,7 @@ void loop()
         else if (millis()-tempoLancamento<6000){
           Serial.print("c");
           Serial.println(tempoLancamento);
-          servoPuxador.write(75);
+          servoPuxador.write(valorDestensionado);
         }
         else if (millis()-tempoLancamento<8000){
           Serial.print("d");
@@ -285,10 +288,12 @@ void girar()
   //ativa motorGiro
   //digitalWrite(motorAlvoLigar, HIGH);
   int t0 = millis()%3000;
+  Serial.println(t0);
   //Serial.println(contadorPosServo);
   if(t0<1500){
     contadorPosServo+=1;
     contadorPosServo = constrain(contadorPosServo,0,90);
+    //Serial.print(contadorPosServo);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==180){
     //  ladoGiro=false;    
@@ -297,6 +302,7 @@ void girar()
   else{
     contadorPosServo-=1;
     contadorPosServo = constrain(contadorPosServo,0,90);
+    //Serial.println(contadorPosServo);
   	servoGirador.write(contadorPosServo);
     //if(contadorPosServo==0){
     //  ladoGiro=true;    
@@ -315,5 +321,5 @@ void arrumar()
 {
   //updateTempoLancamento=true;
   travaCatapulta.write(180);
-  servoPuxador.write(50);
+  servoPuxador.write(valorTensionado);
 }
