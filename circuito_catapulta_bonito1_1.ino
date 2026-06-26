@@ -23,7 +23,7 @@
 #define db6 26
 #define db7 27
 */
-
+#define PotMexer A5
 int valorTensionado = 80;
 int valorDestensionado = 180;
 
@@ -73,11 +73,12 @@ void setup()
 
 unsigned long tempoLancamento = millis();
 bool updateTempoLancamento = true;
-String dif[3] = {"Facil", "Medio", "Dificil"};
+String dif[2] = {"Auto", "Manual"};
 int i = 0;
 int tempoBotao = 0;
 bool apertou = 0;
 bool valorBotao = 0;
+bool recarregando=0;
 int velocidade=0;
 void loop()
 {
@@ -129,10 +130,10 @@ void loop()
     */
     if(apertou){
       apertou=false;
-      if(tempoBotao <= 500){
+      if(tempoBotao <= 200){
         tempoBotao = 0;
         i = i + 1;
-        if(i==3){
+        if(i==2){
           i = 0;
         }
         lcd.clear();
@@ -210,6 +211,7 @@ void loop()
         //Serial.print("pontos ");
         //Serial.println(pontos);
         valorBotaoAlvo=!digitalRead(botaoAlvo);
+        bool cont2=0;
         //Serial.println(tempoLancamento);
         //Serial.println(millis()-tempoLancamento);
         if (millis()-tempoLancamento<4000){ //puxar tensão
@@ -232,10 +234,24 @@ void loop()
           Serial.print("c");
           Serial.println(tempoLancamento);
           servoPuxador.write(valorDestensionado);
+          recarregando=1;
         }
-        else if (millis()-tempoLancamento<14000){ //ciclo retravar // trocar pra um if(recarregando)
+        else if (recarregando){ //ciclo retravar // trocar pra um if(recarregando)
           Serial.print("d");
           Serial.println(tempoLancamento);
+          if(!cont2){
+            lcd.clear();
+            cont2=1;
+            lcd.home();
+            lcd.print("apos recarregar");
+            lcd.setCursor(0, 1);
+            lcd.print("aperte o botao");
+          }
+          if (valorBotaoAlvo){
+            valorBotaoAlvo = !digitalRead(botaoAlvo);
+            travaCatapulta.write(180);
+            recarregando=0;
+          }
           //travaCatapulta.write(180); por enquanto removido, botar recarregar aqui
         }
         else{
@@ -292,6 +308,7 @@ void girar()
 {
   //ativa motorGiro
   //digitalWrite(motorAlvoLigar, HIGH);
+  if (dificuldade == "Auto"){
   int t0 = millis()%3000;
   Serial.println(t0);
   //Serial.println(contadorPosServo);
@@ -313,6 +330,12 @@ void girar()
     //  ladoGiro=true;    
     //}
   }
+  }
+  else if (dificuldade == "Manual"){
+    int pot = analogRead(A3);
+    int x = map(pot, 0, 1023, 0, 90);
+    servoGirador.write(x);
+  }
 }
 
 void lancar()
@@ -328,3 +351,4 @@ void arrumar()
   travaCatapulta.write(180);
   servoPuxador.write(valorDestensionado);
 }
+
