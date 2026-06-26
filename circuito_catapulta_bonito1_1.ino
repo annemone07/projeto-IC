@@ -24,8 +24,8 @@
 #define db7 27
 */
 
-int valorTensionado = 130;
-int valorDestensionado = 160;
+int valorTensionado = 80;
+int valorDestensionado = 180;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo servoPuxador;
@@ -63,7 +63,7 @@ void setup()
   digitalWrite(motorAlvoLigar, HIGH);
   lcd.init();
   lcd.backlight();
-  servoPuxador.write(valorTensionado);
+  servoPuxador.write(valorDestensionado);
   servoPuxador.attach(servoPuxarLancador);
   servoGirador.write(45);
   servoGirador.attach(servoGiro);
@@ -212,7 +212,10 @@ void loop()
         valorBotaoAlvo=!digitalRead(botaoAlvo);
         //Serial.println(tempoLancamento);
         //Serial.println(millis()-tempoLancamento);
-        if(millis()-tempoLancamento<2000){
+        if (millis()-tempoLancamento<4000){ //puxar tensão
+            servoPuxador.write(valorTensionado);
+        }
+        else if(millis()-tempoLancamento<6000){ //destravar trava
           Serial.print("a ");
           Serial.println(tempoLancamento);
           analogWrite(motorAlvoPos, 0);
@@ -220,20 +223,20 @@ void loop()
           lancar();
           travaCatapulta.write(90);
         }
-        else if (millis()-tempoLancamento<4000){
+        else if (millis()-tempoLancamento<8000){ //desligar estado de lançamento
           Serial.print("b ");
           Serial.println(tempoLancamento);
           lancando=false;
         }
-        else if (millis()-tempoLancamento<6000){
+        else if (millis()-tempoLancamento<10000){ //ciclo destensionar
           Serial.print("c");
           Serial.println(tempoLancamento);
           servoPuxador.write(valorDestensionado);
         }
-        else if (millis()-tempoLancamento<8000){
+        else if (millis()-tempoLancamento<14000){ //ciclo retravar // trocar pra um if(recarregando)
           Serial.print("d");
           Serial.println(tempoLancamento);
-          travaCatapulta.write(180);
+          //travaCatapulta.write(180); por enquanto removido, botar recarregar aqui
         }
         else{
           Serial.print("e");
@@ -241,6 +244,8 @@ void loop()
           updateTempoLancamento=true;
           botaoLancamentoApertado=false;
           analogWrite(motorAlvoPos, 255);
+          delay(5000); //temp
+          travaCatapulta.write(180); //temp
           //delay(20);
         }
       }
@@ -321,5 +326,5 @@ void arrumar()
 {
   //updateTempoLancamento=true;
   travaCatapulta.write(180);
-  servoPuxador.write(valorTensionado);
+  servoPuxador.write(valorDestensionado);
 }
