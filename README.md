@@ -9,6 +9,7 @@ Para os parafusos que não são dos servos, foi utilizado a base de M3. É recom
 
 //COMPONENTES//
 2x Botão
+
 2x Micro Servo motor 9g SG90
 1x Micro Servo motor MG90
 1x LCD I2C
