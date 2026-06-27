@@ -15,5 +15,5 @@ Para os parafusos que não são dos servos, foi utilizado a base de M3. É recom
 1x Switch
 1x Potenciômetro
 
-//OBSERVAÇÕES//
-Podem existir pequenas variações no tamanho dos servos a depender do fabricante. Caso ache relevante e possua o conhecimento, é válido alterar as medidas dos encaixes para evitar o uso de colas ou retrabalho.
+//OBSERVAÇÕES IMPORTANTES//
+Podem existir pequenas variações no tamanho dos servos a depender do fabricante. Caso ache relevante e possua o conhecimento, é válido alterar as medidas dos encaixes para evitar o uso de colas ou retrabalho. É recomendado o uso de uma fonte externa entre 5-5.5V para alimentar os servos, pois conexões diretas no arduino podem causar problemas de operação. LCD pode ser conectado na saída de 5V do arduino diretamente
