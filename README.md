@@ -1,3 +1,6 @@
+Esse projeto foi desenvolvido por alunos de graduação do primeiro período em Engenharia da Computação do CIn - UFPE. Abaixo estão alguns comentários e observações para aqueles que se interessarem em replicar o projeto.
+
+
 //PEÇAS//
 As peças da montagem já estão nos arquivos para impressão/corte à laser. Todas as peças de impressão foram feitas com PLA e preenchimento de giroide. Todas as peças, exceto a barra lateral, foram impressas com densidade de 15%. Já a barra lateral foi impressa com densidade 20% e "em pé" para aumentar a resistência mecânica. Diversas partes foram lixadas em momentos da montagem, sendo recomendado o seu uso para facilitar o encaixe e a movimentação mecânica(podendo ser feito de modo manual ou com micro retifica). A alavanca foi cortada em acrílico com espessura de 3mm.
 
